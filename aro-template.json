@@ -2,6 +2,12 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "resourceGroup": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the existing Resource Group where the ARO cluster resource will be created (deployment RG)."
+      }
+    },
     "clusterName": {
       "type": "string",
       "metadata": {
@@ -12,13 +18,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "Domain name can be a custom domain (example.com) or a prefix (abc) that will be used as part of the auto-generated DNS name for OpenShift console and API servers. Leave empty to be random generated"
-      }
-    },
-    "resourceGroup": {
-      "type": "string",
-      "metadata": {
-        "description": "The name of the existing resource group where the ARO cluster will be deployed."
+        "description": "Domain name can be a custom domain (example.com) or a prefix (abc) that will be used as part of the auto-generated DNS name for OpenShift console and API servers. Leave empty to be randomly generated."
       }
     },
     "vnetId": {
@@ -57,14 +57,14 @@
       "type": "string",
       "defaultValue": "172.18.0.0/16",
       "metadata": {
-        "description": "CIDR of pod network. Must be a minimum of /18 or larger.Default 10.128.0.0/14."
+        "description": "CIDR of pod network. Must be a minimum of /18 or larger."
       }
     },
     "serviceCidr": {
       "type": "string",
       "defaultValue": "172.17.0.0/16",
       "metadata": {
-        "description": "CIDR of service network. Must be a minimum of /18 or larger. Default 172.30.0.0/16."
+        "description": "CIDR of service network. Must be a minimum of /18 or larger."
       }
     },
     "masterVmSize": {
@@ -85,14 +85,14 @@
       "type": "int",
       "defaultValue": 128,
       "metadata": {
-        "description": "Disk size in GB of worker VMs. Default Value is 128GB"
+        "description": "Disk size in GB of worker VMs. Default is 128GB."
       }
     },
     "workerCount": {
       "type": "int",
       "defaultValue": 3,
       "metadata": {
-        "description": "Number of worker nodes. Default is 3"
+        "description": "Number of worker nodes. Default is 3."
       }
     },
     "outboundType": {
@@ -103,7 +103,7 @@
       ],
       "defaultValue": "LoadBalancer",
       "metadata": {
-        "description": "Select the outbound type. If UserDefinedRouting ingress and api server Visibility should be set to Private"
+        "description": "Select the outbound type. If UserDefinedRouting, ingress and API server visibility should be set to Private."
       }
     },
     "ingressVisibility": {
@@ -132,14 +132,14 @@
       "type": "bool",
       "defaultValue": false,
       "metadata": {
-        "description": "Preconfigure NSGs. Nsgs should be created in advance and associated to master and worker subnets"
+        "description": "Preconfigure NSGs. NSGs should be created in advance and associated with master and worker subnets."
       }
     },
     "clusterResourceGroup": {
       "type": "string",
-      "defaultValue": "aro-cluster-MC",
+      "defaultValue": "[concat(parameters('clusterName'), '-MC')]",
       "metadata": {
-        "description": "Resource group name for cluster-managed resources."
+        "description": "Resource group name for cluster-managed resources (must be different from deployment RG)."
       }
     },
     "pullSecret": {
@@ -158,10 +158,10 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "clusterProfile": {
-          "resourceGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('resourceGroup'))]",
           "domain": "[parameters('domain')]",
           "version": "[parameters('version')]",
-          "pullSecret": "[parameters('pullSecret')]"
+          "pullSecret": "[parameters('pullSecret')]",
+          "resourceGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('clusterResourceGroup'))]"
         },
         "networkProfile": {
           "podCidr": "[parameters('podCidr')]",
@@ -190,13 +190,8 @@
             "visibility": "[parameters('ingressVisibility')]"
           }
         ],
-        "clusterResourceGroup": "[parameters('clusterResourceGroup')]"
+        "enablePreconfiguredNSG": "[parameters('enablePreconfiguredNsg')]"
       }
     }
   ]
 }
-
-
-
-
-
