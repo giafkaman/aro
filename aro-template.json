@@ -1,0 +1,120 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "clusterName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the ARO cluster."
+      }
+    },
+    "vnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of the virtual network."
+      }
+    },
+    "masterSubnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of the master subnet."
+      }
+    },
+    "workerSubnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of the worker subnet."
+      }
+    },
+    "version": {
+      "type": "string",
+      "defaultValue": "4.18.26",
+      "metadata": {
+        "description": "ARO cluster version."
+      }
+    },
+    "podCidr": {
+      "type": "string",
+      "defaultValue": "172.18.0.0/16",
+      "metadata": {
+        "description": "CIDR for pods."
+      }
+    },
+    "serviceCidr": {
+      "type": "string",
+      "defaultValue": "172.17.0.0/16",
+      "metadata": {
+        "description": "CIDR for services."
+      }
+    },
+    "masterVmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D8s_v5",
+      "metadata": {
+        "description": "VM size for master nodes."
+      }
+    },
+    "workerVmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D4s_v5",
+      "metadata": {
+        "description": "VM size for worker nodes."
+      }
+    },
+    "workerCount": {
+      "type": "int",
+      "defaultValue": 3,
+      "metadata": {
+        "description": "Number of worker nodes."
+      }
+    },
+    "clusterResourceGroup": {
+      "type": "string",
+      "defaultValue": "aro-cluster-MC",
+      "metadata": {
+        "description": "Resource group for cluster-managed resources."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.RedHatOpenShift/openShiftClusters",
+      "apiVersion": "2022-09-04",
+      "name": "[parameters('clusterName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "clusterProfile": {
+          "domain": "[parameters('clusterName')]",
+          "version": "[parameters('version')]"
+        },
+        "networkProfile": {
+          "podCidr": "[parameters('podCidr')]",
+          "serviceCidr": "[parameters('serviceCidr')]",
+          "outboundType": "UserDefinedRouting"
+        },
+        "masterProfile": {
+          "vmSize": "[parameters('masterVmSize')]",
+          "subnetId": "[parameters('masterSubnetId')]"
+        },
+        "workerProfiles": [
+          {
+            "name": "worker",
+            "vmSize": "[parameters('workerVmSize')]",
+            "subnetId": "[parameters('workerSubnetId')]",
+            "count": "[parameters('workerCount')]"
+          }
+        ],
+        "apiserverProfile": {
+          "visibility": "Private"
+        },
+        "ingressProfiles": [
+          {
+            "name": "default",
+            "visibility": "Private"
+          }
+        ],
+        "clusterResourceGroup": "[parameters('clusterResourceGroup')]"
+      }
+    }
+  ]
+}
