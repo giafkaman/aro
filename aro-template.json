@@ -10,8 +10,9 @@
     },
     "domain": {
       "type": "string",
+      "defaultValue": "",
       "metadata": {
-        "description": "Domain name can be a custom domain (example.com) or a prefix (abc) that will be used as part of the auto-generated DNS name for OpenShift console and API servers."
+        "description": "Domain name can be a custom domain (example.com) or a prefix (abc) that will be used as part of the auto-generated DNS name for OpenShift console and API servers. Leave empty to be random generated"
       }
     },
     "vnetId": {
@@ -137,6 +138,7 @@
     },
     "pullSecret": {
       "type": "securestring",
+      "defaultValue": "",
       "metadata": {
         "description": "A Red Hat pull secret enables your cluster to access Red Hat container registries. [Learn more](https://learn.microsoft.com/en-us/azure/openshift/create-cluster?pivots=aro-azure-cli#get-a-red-hat-pull-secret-optional)"
       }
@@ -186,3 +188,4 @@
     }
   ]
 }
+
