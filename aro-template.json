@@ -8,6 +8,12 @@
         "description": "Name of the ARO cluster."
       }
     },
+    "domain": {
+      "type": "string",
+      "metadata": {
+        "description": "Domain name can be a custom domain (example.com) or a prefix (abc) that will be used as part of the auto-generated DNS name for OpenShift console and API servers."
+      }
+    },
     "vnetId": {
       "type": "string",
       "metadata": {
@@ -28,23 +34,30 @@
     },
     "version": {
       "type": "string",
+      "allowedValues": [
+        "4.16.30",
+        "4.16.39",
+        "4.16.48",
+        "4.17.27",
+        "4.18.26"
+      ],
       "defaultValue": "4.18.26",
       "metadata": {
-        "description": "ARO cluster version."
+        "description": "ARO cluster version (mandatory)."
       }
     },
     "podCidr": {
       "type": "string",
       "defaultValue": "172.18.0.0/16",
       "metadata": {
-        "description": "CIDR for pods."
+        "description": "CIDR of pod network. Must be a minimum of /18 or larger.Default 10.128.0.0/14."
       }
     },
     "serviceCidr": {
       "type": "string",
       "defaultValue": "172.17.0.0/16",
       "metadata": {
-        "description": "CIDR for services."
+        "description": "CIDR of service network. Must be a minimum of /18 or larger. Default 172.30.0.0/16."
       }
     },
     "masterVmSize": {
@@ -61,18 +74,71 @@
         "description": "VM size for worker nodes."
       }
     },
+    "workerVmDiskSizeGB": {
+      "type": "int",
+      "defaultValue": 128,
+      "metadata": {
+        "description": "Disk size in GB of worker VMs. Default Value is 128GB"
+      }
+    },
     "workerCount": {
       "type": "int",
       "defaultValue": 3,
       "metadata": {
-        "description": "Number of worker nodes."
+        "description": "Number of worker nodes. Default is 3"
+      }
+    },
+    "outboundType": {
+      "type": "string",
+      "allowedValues": [
+        "LoadBalancer",
+        "UserDefinedRouting"
+      ],
+      "defaultValue": "LoadBalancer",
+      "metadata": {
+        "description": "Select the outbound type. If UserDefinedRouting ingress and api server Visibility should be set to Private"
+      }
+    },
+    "ingressVisibility": {
+      "type": "string",
+      "allowedValues": [
+        "Public",
+        "Private"
+      ],
+      "defaultValue": "Public",
+      "metadata": {
+        "description": "Specifies whether ingress should be Public or Private."
+      }
+    },
+    "apiserverVisibility": {
+      "type": "string",
+      "allowedValues": [
+        "Public",
+        "Private"
+      ],
+      "defaultValue": "Public",
+      "metadata": {
+        "description": "Specifies whether the API server should be Public or Private."
+      }
+    },
+    "enablePreconfiguredNsg": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Preconfigure NSGs. Nsgs should be created in advance and associated to master and worker subnets"
       }
     },
     "clusterResourceGroup": {
       "type": "string",
       "defaultValue": "aro-cluster-MC",
       "metadata": {
-        "description": "Resource group for cluster-managed resources."
+        "description": "Resource group name for cluster-managed resources."
+      }
+    },
+    "pullSecret": {
+      "type": "securestring",
+      "metadata": {
+        "description": "A Red Hat pull secret enables your cluster to access Red Hat container registries. [Learn more](https://learn.microsoft.com/en-us/azure/openshift/create-cluster?pivots=aro-azure-cli#get-a-red-hat-pull-secret-optional)"
       }
     }
   },
@@ -84,13 +150,14 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "clusterProfile": {
-          "domain": "[parameters('clusterName')]",
-          "version": "[parameters('version')]"
+          "domain": "[parameters('domain')]",
+          "version": "[parameters('version')]",
+          "pullSecret": "[parameters('pullSecret')]"
         },
         "networkProfile": {
           "podCidr": "[parameters('podCidr')]",
           "serviceCidr": "[parameters('serviceCidr')]",
-          "outboundType": "UserDefinedRouting"
+          "outboundType": "[parameters('outboundType')]"
         },
         "masterProfile": {
           "vmSize": "[parameters('masterVmSize')]",
@@ -100,17 +167,18 @@
           {
             "name": "worker",
             "vmSize": "[parameters('workerVmSize')]",
+            "diskSizeGB": "[parameters('workerVmDiskSizeGB')]",
             "subnetId": "[parameters('workerSubnetId')]",
             "count": "[parameters('workerCount')]"
           }
         ],
         "apiserverProfile": {
-          "visibility": "Private"
+          "visibility": "[parameters('apiserverVisibility')]"
         },
         "ingressProfiles": [
           {
             "name": "default",
-            "visibility": "Private"
+            "visibility": "[parameters('ingressVisibility')]"
           }
         ],
         "clusterResourceGroup": "[parameters('clusterResourceGroup')]"
