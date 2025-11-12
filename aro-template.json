@@ -161,7 +161,8 @@
           "domain": "[parameters('domain')]",
           "version": "[parameters('version')]",
           "pullSecret": "[parameters('pullSecret')]",
-          "resourceGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('clusterResourceGroup'))]"
+          "resourceGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('clusterResourceGroup'))]",
+          "fipsValidatedModules": null
         },
         "networkProfile": {
           "podCidr": "[parameters('podCidr')]",
@@ -195,3 +196,4 @@
     }
   ]
 }
+
