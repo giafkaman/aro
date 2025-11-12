@@ -150,6 +150,7 @@
       "apiVersion": "2022-09-04",
       "name": "[parameters('clusterName')]",
       "location": "[resourceGroup().location]",
+      "scope": "[resourceGroup().id]",
       "properties": {
         "clusterProfile": {
           "domain": "[parameters('domain')]",
@@ -188,4 +189,5 @@
     }
   ]
 }
+
 
