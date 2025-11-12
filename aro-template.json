@@ -158,6 +158,7 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "clusterProfile": {
+          "resourceGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('resourceGroup'))]",
           "domain": "[parameters('domain')]",
           "version": "[parameters('version')]",
           "pullSecret": "[parameters('pullSecret')]"
@@ -194,6 +195,7 @@
     }
   ]
 }
+
 
 
 
