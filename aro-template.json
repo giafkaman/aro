@@ -158,7 +158,7 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "clusterProfile": {
-          "domain": "[parameters('domain')]",
+          "domain": "[if(equals(parameters('domain'), ''), substring(guid(resourceGroup().id), 0, 8), parameters('domain'))]",
           "version": "[parameters('version')]",
           "pullSecret": "[parameters('pullSecret')]",
           "resourceGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('clusterResourceGroup'))]",
