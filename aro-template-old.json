@@ -1,0 +1,203 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resourceGroup": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the existing Resource Group where the ARO cluster resource will be created (deployment RG)."
+      }
+    },
+    "domain": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Prefix (e.g. 'myprefix') OR full domain (e.g. 'test.com'). Leave empty to auto-generate prefix."
+      }
+    },
+    "clusterName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the ARO cluster."
+      }
+    },"vnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of the virtual network."
+      }
+    },
+    "masterSubnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of the master subnet."
+      }
+    },
+    "workerSubnetId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of the worker subnet."
+      }
+    },
+    "version": {
+      "type": "string",
+      "allowedValues": [
+        "4.16.30",
+        "4.16.39",
+        "4.16.48",
+        "4.17.27",
+        "4.18.26"
+      ],
+      "defaultValue": "4.18.26",
+      "metadata": {
+        "description": "ARO cluster version (mandatory)."
+      }
+    },
+    "podCidr": {
+      "type": "string",
+      "defaultValue": "172.18.0.0/16",
+      "metadata": {
+        "description": "CIDR of pod network. Must be a minimum of /18 or larger."
+      }
+    },
+    "serviceCidr": {
+      "type": "string",
+      "defaultValue": "172.17.0.0/16",
+      "metadata": {
+        "description": "CIDR of service network. Must be a minimum of /18 or larger."
+      }
+    },
+    "masterVmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D8s_v5",
+      "metadata": {
+        "description": "VM size for master nodes."
+      }
+    },
+    "workerVmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D4s_v5",
+      "metadata": {
+        "description": "VM size for worker nodes."
+      }
+    },
+    "workerVmDiskSizeGB": {
+      "type": "int",
+      "defaultValue": 128,
+      "metadata": {
+        "description": "Disk size in GB of worker VMs. Default is 128GB."
+      }
+    },
+    "workerCount": {
+      "type": "int",
+      "defaultValue": 3,
+      "metadata": {
+        "description": "Number of worker nodes. Default is 3."
+      }
+    },
+    "outboundType": {
+      "type": "string",
+      "allowedValues": [
+        "LoadBalancer",
+        "UserDefinedRouting"
+      ],
+      "defaultValue": "LoadBalancer",
+      "metadata": {
+        "description": "Select the outbound type. If UserDefinedRouting, ingress and API server visibility should be set to Private."
+      }
+    },
+    "ingressVisibility": {
+      "type": "string",
+      "allowedValues": [
+        "Public",
+        "Private"
+      ],
+      "defaultValue": "Public",
+      "metadata": {
+        "description": "Specifies whether ingress should be Public or Private."
+      }
+    },
+    "apiserverVisibility": {
+      "type": "string",
+      "allowedValues": [
+        "Public",
+        "Private"
+      ],
+      "defaultValue": "Public",
+      "metadata": {
+        "description": "Specifies whether the API server should be Public or Private."
+      }
+    },
+    "enablePreconfiguredNsg": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Preconfigure NSGs. NSGs should be created in advance and associated with master and worker subnets."
+      }
+    },
+    "clusterResourceGroup": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('clusterName'), '-MC')]",
+      "metadata": {
+        "description": "Resource group name for cluster-managed resources (must be different from deployment RG)."
+      }
+    },
+    "pullSecret": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "A Red Hat pull secret enables your cluster to access Red Hat container registries. [Learn more](https://learn.microsoft.com/en-us/azure/openshift/create-cluster?pivots=aro-azure-cli#get-a-red-hat-pull-secret-optional)"
+      }
+    }
+  },
+  "variables": {
+    "generatedPrefix": "[substring(replace(guid(resourceGroup().id), '-', ''), 0, 10)]",
+    "domainValue": "[if(equals(parameters('domain'), ''), variables('generatedPrefix'), parameters('domain'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.RedHatOpenShift/openShiftClusters",
+      "apiVersion": "2022-09-04",
+      "name": "[parameters('clusterName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "clusterProfile": {
+          "domain": "[variables('domainValue')]",
+          "version": "[parameters('version')]",
+          "pullSecret": "[parameters('pullSecret')]",
+          "resourceGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('clusterResourceGroup'))]",
+          "fipsValidatedModules": null
+        },
+        "networkProfile": {
+          "podCidr": "[parameters('podCidr')]",
+          "serviceCidr": "[parameters('serviceCidr')]",
+          "outboundType": "[parameters('outboundType')]"
+        },
+        "masterProfile": {
+          "vmSize": "[parameters('masterVmSize')]",
+          "subnetId": "[parameters('masterSubnetId')]"
+        },
+        "workerProfiles": [
+          {
+            "name": "worker",
+            "vmSize": "[parameters('workerVmSize')]",
+            "diskSizeGB": "[parameters('workerVmDiskSizeGB')]",
+            "subnetId": "[parameters('workerSubnetId')]",
+            "count": "[parameters('workerCount')]"
+          }
+        ],
+        "apiserverProfile": {
+          "visibility": "[parameters('apiserverVisibility')]"
+        },
+        "ingressProfiles": [
+          {
+            "name": "default",
+            "visibility": "[parameters('ingressVisibility')]"
+          }
+        ],
+        "enablePreconfiguredNSG": "[parameters('enablePreconfiguredNsg')]"
+      }
+    }
+  ]
+}
+
+
