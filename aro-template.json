@@ -8,6 +8,13 @@
         "description": "Name of the existing Resource Group where the ARO cluster resource will be created (deployment RG)."
       }
     },
+    "domain": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Prefix (e.g. 'myprefix') OR full domain (e.g. 'test.com'). Leave empty to auto-generate prefix."
+      }
+    },
     "clusterName": {
       "type": "string",
       "metadata": {
@@ -142,6 +149,12 @@
       }
     }
   },
+  "variables": {
+    "regionDns": "[replace(toLower(resourceGroup().location), ' ', '')]",
+    "generatedPrefix": "[substring(replace(guid(resourceGroup().id), '-', ''), 0, 10)]",
+    "prefix": "[if(equals(parameters('domain'), ''), variables('generatedPrefix'), parameters('domain'))]",
+    "domainValue": "[if(contains(parameters('domain'), '.'), parameters('domain'), concat(variables('prefix'), '.', variables('regionDns'), '.aroapp.io'))]"
+  },
   "resources": [
     {
       "type": "Microsoft.RedHatOpenShift/openShiftClusters",
@@ -150,6 +163,7 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "clusterProfile": {
+          "domain": "[variables('domainValue')]",
           "version": "[parameters('version')]",
           "pullSecret": "[parameters('pullSecret')]",
           "resourceGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('clusterResourceGroup'))]",
