@@ -150,10 +150,8 @@
     }
   },
   "variables": {
-    "regionDns": "[replace(toLower(resourceGroup().location), ' ', '')]",
     "generatedPrefix": "[substring(replace(guid(resourceGroup().id), '-', ''), 0, 10)]",
-    "prefix": "[if(equals(parameters('domain'), ''), variables('generatedPrefix'), parameters('domain'))]",
-    "domainValue": "[if(contains(parameters('domain'), '.'), parameters('domain'), concat(variables('prefix'), '.', variables('regionDns'), '.aroapp.io'))]"
+    "domainValue": "[if(equals(parameters('domain'), ''), variables('generatedPrefix'), parameters('domain'))]"
   },
   "resources": [
     {
