@@ -13,15 +13,7 @@
       "metadata": {
         "description": "Name of the ARO cluster."
       }
-    },
-    "domain": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Domain name can be a custom domain (example.com) or a prefix (abc) that will be used as part of the auto-generated DNS name for OpenShift console and API servers. Leave empty to be randomly generated."
-      }
-    },
-    "vnetId": {
+    },"vnetId": {
       "type": "string",
       "metadata": {
         "description": "Resource ID of the virtual network."
@@ -158,7 +150,6 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "clusterProfile": {
-          "domain": "[if(equals(parameters('domain'), ''), substring(guid(resourceGroup().id), 0, 8), parameters('domain'))]",
           "version": "[parameters('version')]",
           "pullSecret": "[parameters('pullSecret')]",
           "resourceGroupId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('clusterResourceGroup'))]",
