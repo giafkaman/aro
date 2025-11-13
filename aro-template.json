@@ -16,7 +16,7 @@
     },
     "domain": {
       "type": "string",
-      "defaultValue": "",
+      "defaultValue": null,
       "metadata": {
         "description": "Domain name can be a custom domain (example.com) or a prefix (abc) that will be used as part of the auto-generated DNS name for OpenShift console and API servers. Leave empty to be randomly generated."
       }
@@ -196,4 +196,5 @@
     }
   ]
 }
+
 
