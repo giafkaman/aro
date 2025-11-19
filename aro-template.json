@@ -18,7 +18,6 @@
       },
       "pullSecret": {
           "type": "string",
-          "defaultValue": null,
           "metadata": {
               "description": "Pull secret from cloud.redhat.com. The json should be input as a string"
           }
@@ -108,7 +107,7 @@
               "dept": "Ops"
           },
           "metadata": {
-              "description": "Tags for resources."
+              "description": "Tags for resources"
           }
       },
       "apiServerVisibility": {
@@ -268,7 +267,7 @@
                         "name": "default",
                         "visibility": "[parameters('ingressVisibility')]"
                     }
-                ],
+                ]
             }
         }
     ],
@@ -283,8 +282,3 @@
          }
     }
 }
-
-
-
-
-
