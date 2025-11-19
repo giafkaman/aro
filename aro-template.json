@@ -16,9 +16,10 @@
               "description": "Domain Prefix"
           }
       },
+      
       "pullSecret": {
-          "type": "string",
-          "defaultValue": "",
+          "type": "secureObject",
+          "defaultValue": {},
           "metadata": {
               "description": "Optional: Pull secret from cloud.redhat.com. The json should be input as a string"
           }
@@ -237,7 +238,7 @@
                 "clusterProfile": {
                     "domain": "[parameters('domain')]",
                     "resourceGroupId": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/aro-', parameters('domain'))]",
-                    "pullSecret": "[parameters('pullSecret')]"
+                    "pullSecret": "[if(equals(parameters('pullSecret'), {}), json('null'), parameters('pullSecret'))]"
                 },
                 "networkProfile": {
                     "podCidr": "[parameters('podCidr')]",
