@@ -17,10 +17,9 @@
           }
       },
       "pullSecret": {
-          "type": "string",
-          "defaultValue": null,
+          "type": "securestring",
           "metadata": {
-              "description": "Pull secret from cloud.redhat.com. The json should be input as a string"
+              "description": "Optional: Pull secret from cloud.redhat.com. The json should be input as a string"
           }
       },
       "clusterVnetName": {
