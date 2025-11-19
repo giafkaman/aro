@@ -276,9 +276,7 @@
                         "visibility": "[parameters('ingressVisibility')]"
                     }
                 ],
-                "preconfiguredNsgs":{
-                    "preconfiguredNsgs": "[parameters('preconfiguredNsgs')]"
-                },
+                 "preconfiguredNsgs": "[parameters('preconfiguredNsgs')]"
             }
         }
     ],
@@ -293,4 +291,5 @@
          }
     }
 }
+
 
