@@ -101,13 +101,6 @@
           "description": "Unique name for the cluster"
         }
       },
-      "preconfiguredNsgs": {
-        "type": "boolean",
-        "defaultValue": "false",
-        "metadata": {
-            "description": "Choose where BY own NSG or not. If set to TRUE NSG/S should be created in advance and associated to master and worker subnets. Have in mind that you will lose automotian that way"
-        }  
-      },  
       "tags": {
           "type": "object",
           "defaultValue" : {
@@ -250,9 +243,6 @@
                     "podCidr": "[parameters('podCidr')]",
                     "serviceCidr": "[parameters('serviceCidr')]"
                 },
-                "nsgProfile" :{
-                    "preconfiguredNsgs": "[parameters('preconfiguredNsgs')]"
-                },
                 "servicePrincipalProfile": {
                     "clientId": "[parameters('aadClientId')]",
                     "clientSecret": "[parameters('aadClientSecret')]"
@@ -293,6 +283,7 @@
          }
     }
 }
+
 
 
 
