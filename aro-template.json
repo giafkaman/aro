@@ -18,6 +18,7 @@
       },
       "pullSecret": {
           "type": "string",
+          "defaultValue": null
           "metadata": {
               "description": "Pull secret from cloud.redhat.com. The json should be input as a string"
           }
@@ -100,6 +101,13 @@
           "description": "Unique name for the cluster"
         }
       },
+      "preconfiguredNsgs":{
+        "type": "boolean",
+        "defaultValue": "false"
+        "metadata": {
+            "description":"Choose where BY own NSG or not. If set to TRUE NSG/S should be created in advance and associated to master and worker subnets. Have in mind that you will lose automotian that way"
+        }  
+      },  
       "tags": {
           "type": "object",
           "defaultValue" : {
@@ -107,7 +115,7 @@
               "dept": "Ops"
           },
           "metadata": {
-              "description": "Tags for resources"
+              "description": "Tags for resources."
           }
       },
       "apiServerVisibility": {
@@ -267,7 +275,10 @@
                         "name": "default",
                         "visibility": "[parameters('ingressVisibility')]"
                     }
-                ]
+                ],
+                "preconfiguredNsgs":{
+                    "preconfiguredNsgs": "[parameters('preconfiguredNsgs')]"
+                },
             }
         }
     ],
@@ -282,3 +293,4 @@
          }
     }
 }
+
